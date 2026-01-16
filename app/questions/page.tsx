@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { calculateResults } from "@/lib/calculateResults";
 import { useState } from "react";
 import { questions } from "@/data/questions";
+import { calculateResults } from "@/lib/calculateResults";
 
 export default function QuestionsPage() {
     const router = useRouter();
@@ -11,68 +11,97 @@ export default function QuestionsPage() {
     const [answers, setAnswers] = useState<Record<string, string[]>>({});
 
     const currentQuestion = questions[currentIndex];
-    const selectedForCurrent = answers[currentQuestion.id] && answers[currentQuestion.id].length > 0;
-
-
+    const selectedOptions = answers[currentQuestion.id] || [];
+    const selectedForCurrent = selectedOptions.length > 0;
 
     function handleOptionSelect(optionId: string) {
-    const questionId = currentQuestion.id;
-    const prevSelections = answers[questionId] || [];
+        const questionId = currentQuestion.id;
+        const prevSelections = answers[questionId] || [];
 
-    let updatedSelections: string[];
+        let updatedSelections: string[];
 
-    if (currentQuestion.multiple) {
-        if (prevSelections.includes(optionId)) {
-        updatedSelections = prevSelections.filter((id) => id !== optionId);
+        if (currentQuestion.multiple) {
+        updatedSelections = prevSelections.includes(optionId)
+            ? prevSelections.filter((id) => id !== optionId)
+            : [...prevSelections, optionId];
         } else {
-        updatedSelections = [...prevSelections, optionId];
-        }
-    } else {
         updatedSelections = [optionId];
-    }
+        }
 
-    setAnswers({
+        setAnswers({
         ...answers,
         [questionId]: updatedSelections,
-    });
+        });
     }
 
     return (
-        <main style={{ padding: 24 }}>
-        <h2>
+        <main>
+        {/* Progress */}
+        <p style={{ color: "#6b7280", marginBottom: 8 }}>
             Question {currentIndex + 1} of {questions.length}
+        </p>
+
+        {/* Question */}
+        <h2 style={{ fontSize: 22, marginBottom: 20 }}>
+            {currentQuestion.question}
         </h2>
 
-        <h3>{currentQuestion.question}</h3>
-
+        {/* Options */}
         <ul style={{ listStyle: "none", padding: 0 }}>
-        {currentQuestion.options.map((option) => {
-            const selectedOptions = answers[currentQuestion.id] || [];
+            {currentQuestion.options.map((option) => {
             const isSelected = selectedOptions.includes(option.id);
 
             return (
-            <li key={option.id} style={{ marginBottom: 8 }}>
+                <li
+                key={option.id}
+                style={{
+                    marginBottom: 12,
+                    padding: 12,
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 8,
+                    backgroundColor: isSelected ? "#eef2ff" : "#ffffff",
+                    cursor: "pointer",
+                }}
+                onClick={() => handleOptionSelect(option.id)}
+                >
                 <label style={{ cursor: "pointer" }}>
-                <input
+                    <input
                     type={currentQuestion.multiple ? "checkbox" : "radio"}
                     checked={isSelected}
                     onChange={() => handleOptionSelect(option.id)}
-                />
-                {" "}
-                {option.label}
+                    style={{ marginRight: 8 }}
+                    />
+                    {option.label}
                 </label>
-            </li>
+                </li>
             );
-        })}
+            })}
         </ul>
 
+        {/* Validation message */}
         {!selectedForCurrent && (
-        <p className="bg-red-500 text-white">
+            <p style={{ color: "#dc2626", marginTop: 8 }}>
             Please select at least one option to continue.
-        </p>
+            </p>
         )}
 
-        <button
+        {/* Navigation buttons */}
+        <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+            <button
+            onClick={() => setCurrentIndex((i) => i - 1)}
+            disabled={currentIndex === 0}
+            style={{
+                padding: "10px 18px",
+                borderRadius: 6,
+                border: "1px solid #d1d5db",
+                backgroundColor: "#ffffff",
+                cursor: "pointer",
+            }}
+            >
+            Previous
+            </button>
+
+            <button
             onClick={() => {
                 if (currentIndex === questions.length - 1) {
                 const rankedClusters = calculateResults(answers, questions);
@@ -84,17 +113,18 @@ export default function QuestionsPage() {
                 }
             }}
             disabled={!selectedForCurrent}
+            style={{
+                padding: "10px 18px",
+                borderRadius: 6,
+                border: "none",
+                backgroundColor: selectedForCurrent ? "#4f46e5" : "#c7d2fe",
+                color: "#ffffff",
+                cursor: "pointer",
+            }}
             >
             {currentIndex === questions.length - 1 ? "See Results" : "Next"}
-        </button>
-
-        
-        <button
-        onClick={() => setCurrentIndex((i) => i - 1)}
-        disabled={currentIndex === 0}
-        >
-        Previous
-        </button>
+            </button>
+        </div>
         </main>
     );
 }

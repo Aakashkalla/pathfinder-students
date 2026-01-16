@@ -24,10 +24,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      <body>
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#f9fafb",
+          padding: "24px",
+        }}
       >
-        {children}
+        <div
+          style={{
+            maxWidth: "720px",
+            margin: "0 auto",
+            backgroundColor: "#ffffff",
+            padding: "32px",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+          }}
+        >
+          {children}
+        </div>
+      </div>
       </body>
     </html>
   );
