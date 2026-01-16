@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { calculateResults } from "@/lib/calculateResults";
 import { useState } from "react";
 import { questions } from "@/data/questions";
 
 export default function QuestionsPage() {
+    const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string[]>>({});
 
@@ -70,11 +73,22 @@ export default function QuestionsPage() {
         )}
 
         <button
-        onClick={() => setCurrentIndex((i) => i + 1)}
-        disabled={!selectedForCurrent || currentIndex === questions.length - 1}
-        >
-        Next
+            onClick={() => {
+                if (currentIndex === questions.length - 1) {
+                const rankedClusters = calculateResults(answers, questions);
+                router.push(
+                    `/results?top=${rankedClusters.slice(0, 3).join(",")}`
+                );
+                } else {
+                setCurrentIndex((i) => i + 1);
+                }
+            }}
+            disabled={!selectedForCurrent}
+            >
+            {currentIndex === questions.length - 1 ? "See Results" : "Next"}
         </button>
+
+        
         <button
         onClick={() => setCurrentIndex((i) => i - 1)}
         disabled={currentIndex === 0}
