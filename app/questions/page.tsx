@@ -8,6 +8,9 @@ export default function QuestionsPage() {
     const [answers, setAnswers] = useState<Record<string, string[]>>({});
 
     const currentQuestion = questions[currentIndex];
+    const selectedForCurrent = answers[currentQuestion.id] && answers[currentQuestion.id].length > 0;
+
+
 
     function handleOptionSelect(optionId: string) {
     const questionId = currentQuestion.id;
@@ -60,13 +63,23 @@ export default function QuestionsPage() {
         })}
         </ul>
 
+        {!selectedForCurrent && (
+        <p className="bg-red-500 text-white">
+            Please select at least one option to continue.
+        </p>
+        )}
 
         <button
-            className="bg-red-300 cursor-pointer"
-            onClick={() => setCurrentIndex((i) => i + 1)}
-            disabled={currentIndex === questions.length - 1}
+        onClick={() => setCurrentIndex((i) => i + 1)}
+        disabled={!selectedForCurrent || currentIndex === questions.length - 1}
         >
-            Next
+        Next
+        </button>
+        <button
+        onClick={() => setCurrentIndex((i) => i - 1)}
+        disabled={currentIndex === 0}
+        >
+        Previous
         </button>
         </main>
     );
