@@ -5,8 +5,31 @@ import { questions } from "@/data/questions";
 
 export default function QuestionsPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [answers, setAnswers] = useState<Record<string, string[]>>({});
 
     const currentQuestion = questions[currentIndex];
+
+    function handleOptionSelect(optionId: string) {
+    const questionId = currentQuestion.id;
+    const prevSelections = answers[questionId] || [];
+
+    let updatedSelections: string[];
+
+    if (currentQuestion.multiple) {
+        if (prevSelections.includes(optionId)) {
+        updatedSelections = prevSelections.filter((id) => id !== optionId);
+        } else {
+        updatedSelections = [...prevSelections, optionId];
+        }
+    } else {
+        updatedSelections = [optionId];
+    }
+
+    setAnswers({
+        ...answers,
+        [questionId]: updatedSelections,
+    });
+    }
 
     return (
         <main style={{ padding: 24 }}>
@@ -16,13 +39,27 @@ export default function QuestionsPage() {
 
         <h3>{currentQuestion.question}</h3>
 
-        <ul>
-            {currentQuestion.options.map((option) => (
-            <li key={option.id}>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+        {currentQuestion.options.map((option) => {
+            const selectedOptions = answers[currentQuestion.id] || [];
+            const isSelected = selectedOptions.includes(option.id);
+
+            return (
+            <li key={option.id} style={{ marginBottom: 8 }}>
+                <label style={{ cursor: "pointer" }}>
+                <input
+                    type={currentQuestion.multiple ? "checkbox" : "radio"}
+                    checked={isSelected}
+                    onChange={() => handleOptionSelect(option.id)}
+                />
+                {" "}
                 {option.label}
+                </label>
             </li>
-            ))}
+            );
+        })}
         </ul>
+
 
         <button
             className="bg-red-300 cursor-pointer"
